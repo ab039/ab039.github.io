@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abdelrahman Fathy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Abdelrahman Fathy Attia, Mechanical BIM Engineer: HVAC, chilled water, fire fighting and plumbing modelling, coordination and shop drawings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a drawing sheet set. Each section is a "sheet" with a title-block tag; behind it a live MEP plan with flow pulses. */
+:root {
+  --ink: #0b1f22;          /* page ground (dark-first) */
+  --sheet: #112c2c;        /* raised panels */
+  --line: #24474a;         /* hairlines, grid */
+  --fg: #e6eeeb;           /* text */
+  --muted: #9db3ae;        /* secondary text */
+  --accent: #ef8a3f;       /* orange from the portfolio */
+  --teal: #4cc3b7;         /* teal from the portfolio */
+  --chws: #3f9bff; --chwr: #8fd0ff; --ff: #ff4d45; --dcw: #4fd17a; --drn: #d39a52; --duct: #cfe0dd;
+  --shadow: 0 1px 0 rgba(0,0,0,.25);
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) {
+  --ink: #edf2f1; --sheet: #ffffff; --line: #cbd8d6; --fg: #13282b; --muted: #4d6763;
+  --accent: #c4621b; --teal: #1f7c74; --chws: #2a78d1; --chwr: #4f8fc9; --ff: #d23a33; --dcw: #2f9a55; --drn: #a87436; --duct: #6f807e;
+  --shadow: 0 1px 2px rgba(19,40,43,.08); color-scheme: light; } }
+:root[data-theme="light"] {
+  --ink: #edf2f1; --sheet: #ffffff; --line: #cbd8d6; --fg: #13282b; --muted: #4d6763;
+  --accent: #c4621b; --teal: #1f7c74; --chws: #2a78d1; --chwr: #4f8fc9; --ff: #d23a33; --dcw: #2f9a55; --drn: #a87436; --duct: #6f807e;
+  --shadow: 0 1px 2px rgba(19,40,43,.08); color-scheme: light; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { background: var(--ink); color: var(--fg); font: 400 16px/1.6 var(--f-body); }
+#plan { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+main, footer, .bar { position: relative; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ink); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: .01em; }
+p { margin: 0; }
+.label { font: 500 .72rem/1.2 var(--f-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* top bar */
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--ink) 90%, transparent); backdrop-filter: blur(8px); }
+.bar .wrap { display: flex; align-items: center; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.bar .id { font: 600 1.15rem/1 var(--f-display); letter-spacing: .04em; text-transform: uppercase; color: var(--fg); text-decoration: none; }
+.bar .id span { color: var(--accent); }
+.bar nav { margin-left: auto; display: flex; gap: 4px 18px; flex-wrap: wrap; }
+.bar nav a { font: 500 .78rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-decoration: none; }
+.bar nav a:hover { color: var(--fg); }
+
+/* sheet tag (title block) */
+.sheet { padding-block: 72px 24px; }
+.tag { display: grid; grid-template-columns: auto 1fr auto; align-items: end; gap: 0 18px; border-bottom: 2px solid var(--fg); padding-bottom: 10px; margin-bottom: 32px; }
+.tag .no { font: 500 .8rem var(--f-mono); color: var(--accent); border: 1px solid var(--accent); padding: 4px 8px; align-self: center; background: var(--ink); }
+.tag h2 { font-size: clamp(2rem, 4.5vw, 3rem); text-transform: uppercase; }
+.tag .meta { font: .72rem var(--f-mono); color: var(--muted); text-align: right; letter-spacing: .06em; }
+@media (max-width: 560px) { .tag { grid-template-columns: auto 1fr; } .tag .meta { display: none; } }
+
+/* hero */
+.hero { padding-block: 56px 32px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 40px; align-items: center; }
+.hero .kicker { color: var(--teal); }
+.hero h1 { font-size: clamp(2.8rem, 7vw, 5.2rem); text-transform: uppercase; margin-top: 10px; }
+.hero h1 em { font-style: normal; color: var(--accent); display: block; }
+.hero .role { font: 500 1.05rem var(--f-mono); margin-top: 14px; }
+.hero .intro { margin-top: 18px; max-width: 58ch; color: var(--muted); }
+.facts { margin-top: 26px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); background: var(--sheet); }
+.facts div { padding: 12px 14px; border-right: 1px solid var(--line); min-width: 0; }
+.facts div:last-child { border-right: 0; }
+.facts b { display: block; font: 600 1.5rem/1.1 var(--f-display); }
+.cta { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { font: 500 .8rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; padding: 11px 16px; border: 1px solid var(--accent); color: var(--ink); background: var(--accent); cursor: pointer; }
+.btn.ghost { background: var(--sheet); color: var(--fg); border-color: var(--line); }
+.btn:hover { filter: brightness(1.08); }
+.hero figure { margin: 0; }
+.frame { border: 1px solid var(--line); background: var(--sheet); padding: 8px; box-shadow: var(--shadow); }
+.frame img { display: block; width: 100%; height: auto; }
+.cap { display: flex; justify-content: space-between; gap: 12px; padding: 8px 2px 0; font: .72rem var(--f-mono); color: var(--muted); letter-spacing: .05em; }
+@media (max-width: 860px) { .hero { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .facts { grid-template-columns: 1fr; } .facts div { border-right: 0; border-bottom: 1px solid var(--line); } .facts div:last-child { border-bottom: 0; } }
+
+/* experience as revision table */
+.rev { width: 100%; border-collapse: collapse; background: var(--sheet); border: 1px solid var(--line); }
+.rev th { text-align: left; font: 500 .7rem var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; border-bottom: 1px solid var(--fg); }
+.rev td { vertical-align: top; padding: 18px 14px; border-bottom: 1px solid var(--line); }
+.rev tr:last-child td { border-bottom: 0; }
+.rev .r { font: 600 1.6rem/1 var(--f-display); color: var(--accent); width: 56px; }
+.rev .d { font: .8rem/1.5 var(--f-mono); color: var(--muted); white-space: nowrap; width: 150px; }
+.rev h3 { font-size: 1.5rem; }
+.rev .pos { font-weight: 600; margin-top: 2px; }
+.rev .proj { margin-top: 8px; color: var(--muted); font-size: .95rem; }
+.rev ul { margin: 10px 0 0; padding-left: 18px; }
+.rev li { margin: 2px 0; }
+.table-scroll { overflow-x: auto; }
+@media (max-width: 640px) {
+  .rev thead { display: none; }
+  .rev, .rev tbody, .rev tr, .rev td { display: block; width: 100%; }
+  .rev tr { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  .rev td { border: 0; padding: 6px 14px; }
+  .rev .r, .rev .d { width: auto; display: inline-block; }
+}
+
+/* projects: text block, then that project's pictures directly below */
+.projects { display: grid; gap: 32px; }
+.project { border: 1px solid var(--line); background: var(--sheet); padding: 26px; box-shadow: var(--shadow); }
+.phead { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px 36px; }
+.phead h3 { font-size: clamp(1.8rem, 3.4vw, 2.4rem); text-transform: uppercase; margin-top: 6px; }
+.phead .desc { margin-top: 10px; color: var(--muted); max-width: 56ch; }
+.phead .out { margin-top: 12px; }
+.spec { display: grid; grid-template-columns: 120px minmax(0, 1fr); border-top: 1px solid var(--line); margin: 0; align-self: start; }
+.spec dt, .spec dd { margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.spec dt { font: .7rem/2 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.spec dd { font-size: .95rem; min-width: 0; }
+@media (max-width: 820px) { .phead { grid-template-columns: 1fr; } }
+.pgal { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; padding-top: 22px; border-top: 1px dashed var(--line); }
+.pgal figure { margin: 0; min-width: 0; }
+.pgal .wide { grid-column: span 2; }
+.pgal .full { grid-column: 1 / -1; }
+.pgal img { cursor: zoom-in; aspect-ratio: 16 / 10; object-fit: cover; background: #0a1a1c; }
+.pgal img.contain { object-fit: contain; }
+.pgal .frame { padding: 6px; background: var(--ink); }
+@media (max-width: 820px) { .pgal { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .pgal { grid-template-columns: 1fr; } .pgal .wide { grid-column: auto; } }
+.pgal.tall { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.pgal.tall img { aspect-ratio: 3 / 4; object-position: center 30%; }
+@media (max-width: 820px) { .pgal.tall { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.nopic { margin-top: 22px; padding: 16px 18px; border: 1px dashed var(--line); font: .8rem/1.6 var(--f-mono); color: var(--muted); }
+
+/* discipline model switcher inside the hospital project */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tabs button { font: 500 .78rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; padding: 8px 12px; border: 1px solid var(--line); background: var(--ink); color: var(--muted); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.tabs button i { width: 18px; height: 3px; background: var(--c, var(--accent)); }
+.tabs button[aria-selected="true"] { color: var(--fg); border-color: var(--fg); }
+.models { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.models .note { border-left: 3px solid var(--c, var(--accent)); padding: 4px 0 4px 16px; }
+.models .note h4 { font: 600 1.6rem/1.1 var(--f-display); text-transform: uppercase; margin: 0; }
+.models .note p { color: var(--muted); margin-top: 8px; }
+.models img { aspect-ratio: auto; }
+@media (max-width: 820px) { .models { grid-template-columns: 1fr; } }
+
+/* other work */
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.grid figure { margin: 0; min-width: 0; }
+.grid img { cursor: zoom-in; aspect-ratio: 16 / 10; object-fit: cover; }
+.grid .wide { grid-column: span 2; }
+@media (max-width: 820px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .grid { grid-template-columns: 1fr; } .grid .wide { grid-column: auto; } }
+
+/* automation */
+.auto { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 28px; align-items: start; }
+.scripts { list-style: none; margin: 0; padding: 0 18px; border: 1px solid var(--line); background: var(--sheet); }
+.scripts li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.scripts li:last-child { border-bottom: 0; }
+.scripts .k { font: .75rem var(--f-mono); color: var(--accent); padding-top: 3px; }
+.scripts b { display: block; }
+.scripts span { color: var(--muted); font-size: .92rem; }
+.stack { display: grid; gap: 16px; }
+@media (max-width: 860px) { .auto { grid-template-columns: 1fr; } }
+
+/* skills */
+.skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.skill { border: 1px solid var(--line); background: var(--sheet); padding: 18px; min-width: 0; border-top: 3px solid var(--c, var(--teal)); }
+.skill h3 { font-size: 1.35rem; text-transform: uppercase; }
+.skill ul { margin: 10px 0 0; padding-left: 18px; font-size: .93rem; }
+.skill li { margin: 3px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { font: .72rem var(--f-mono); padding: 3px 8px; border: 1px solid var(--line); color: var(--muted); }
+@media (max-width: 900px) { .skills { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .skills { grid-template-columns: 1fr; } }
+.soft { margin-top: 18px; border: 1px solid var(--line); background: var(--sheet); padding: 18px; }
+.soft .chip { color: var(--fg); font-size: .8rem; padding: 6px 10px; }
+
+.edu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.edu > div { border: 1px solid var(--line); background: var(--sheet); padding: 20px; min-width: 0; }
+.edu h3 { font-size: 1.5rem; text-transform: uppercase; margin-top: 6px; }
+.edu p { margin-top: 6px; color: var(--muted); }
+@media (max-width: 640px) { .edu { grid-template-columns: 1fr; } }
+
+/* contact */
+.contact { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.contact h2.big { font-size: clamp(2.2rem, 5vw, 3.6rem); text-transform: uppercase; }
+.contact h2.big em { font-style: normal; color: var(--accent); }
+.lines { border: 1px solid var(--line); background: var(--sheet); padding: 0 16px; }
+.lines div { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.lines div:last-child { border-bottom: 0; }
+.lines .v { font: 500 1rem var(--f-mono); user-select: all; overflow-wrap: anywhere; }
+.copy { font: .7rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border: 1px solid var(--line); background: transparent; color: var(--muted); cursor: pointer; }
+.copy:hover { color: var(--fg); border-color: var(--fg); }
+@media (max-width: 760px) { .contact { grid-template-columns: 1fr; } }
+
+footer { margin-top: 64px; border-top: 2px solid var(--fg); background: var(--ink); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; padding-block: 16px 28px; font: .72rem var(--f-mono); color: var(--muted); letter-spacing: .06em; }
+
+/* lightbox */
+dialog { border: 1px solid var(--line); background: var(--ink); padding: 10px; max-width: min(1200px, 94vw); color: var(--fg); }
+dialog::backdrop { background: rgba(5, 14, 15, .85); }
+dialog img { display: block; max-width: 100%; max-height: 80vh; width: auto; height: auto; margin: 0 auto; }
+dialog .cap { padding: 10px 2px 0; }
+dialog button { position: absolute; top: 14px; right: 14px; }
+</style>
+
+<style>html{-webkit-text-size-adjust:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<canvas id="plan" aria-hidden="true"></canvas>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="id" href="#top">A. Fathy <span>/</span> M-BIM</a>
+    <nav aria-label="Sections">
+      <a href="#experience">Experience</a>
+      <a href="#projects">Projects</a>
+      <a href="#work">Other work</a>
+      <a href="#automation">Dynamo</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <section class="hero" aria-labelledby="name">
+      <div>
+        <p class="label kicker">Sheet M-000 · Cover</p>
+        <h1 id="name">Abdelrahman <em>Fathy Attia</em></h1>
+        <p class="role">Mechanical BIM Engineer</p>
+        <p class="intro">I model, coordinate and detail mechanical systems (HVAC, chilled water, fire fighting and plumbing) on large Gulf projects. My work runs from design review and RFIs to clash reports, shop drawings, builder's works and long-lead calculations, with Dynamo scripts to take the repetitive work out of Revit.</p>
+        <div class="facts">
+          <div><b class="num">2023</b><span class="label">BIM work since</span></div>
+          <div><b>KSA · UAE · KW</b><span class="label">Gulf projects</span></div>
+          <div><b>ISO 19650</b><span class="label">BIM standard</span></div>
+        </div>
+        <div class="cta">
+          <a class="btn" href="#projects">See projects</a>
+          <a class="btn ghost" href="https://www.linkedin.com/in/abdelrahman-fathy-ab8373175/" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn ghost" href="#contact">Contact</a>
+        </div>
+      </div>
+      <figure>
+        <div class="frame"><img src="hero-mep.jpg" alt="Coordinated 3D MEP model with ductwork, chilled water and fire fighting services" data-cap="Coordinated MEP model · Haram project" width="1400" height="759"></div>
+        <figcaption class="cap"><span>Coordinated MEP model</span><span>Revit · Navisworks</span></figcaption>
+      </figure>
+    </section>
+
+    <section class="sheet" id="experience" aria-labelledby="h-exp">
+      <div class="tag"><span class="no">M-101</span><h2 id="h-exp">Experience</h2><span class="meta">4 positions · 2023 – present</span></div>
+      <div class="table-scroll">
+        <table class="rev">
+          <thead><tr><th>Rev</th><th>Period</th><th>Company · role · scope</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="r">D</td>
+              <td class="d">Feb 2026<br>– present</td>
+              <td>
+                <h3>SAUDICO · Saudi Construction Limited</h3>
+                <p class="pos">Mechanical BIM Technical Office Engineer</p>
+                <p class="proj">Pendry Hotel &amp; Commercial Assets Buildings, Diriyah. Owner: DIRIYAH. Consultants: S+A (Samadhin + Associates) and Omrania (egis group). Main contractor: Saudico.</p>
+                <ul>
+                  <li>Review design packages and prepare RFIs</li>
+                  <li>Coordinate HVAC, fire fighting and plumbing with structure, architecture and electrical; produce clash reports</li>
+                  <li>Prepare shop drawings and builder's works</li>
+                  <li>Calculations for long-lead items for approval</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td class="r">C</td>
+              <td class="d">Aug 2025<br>– Jan 2026</td>
+              <td>
+                <h3>Binghatti</h3>
+                <p class="pos">Mechanical BIM Engineer</p>
+                <p class="proj">High-rise towers in Dubai: Bugatti Residences, Mercedes Residences, Skyrise Business Bay, Skyhall Business Bay, Burj Binghatti Jacob &amp; Co. Consultant: Selver Stone. Main contractor: Granada Europe.</p>
+                <ul>
+                  <li>Coordinate HVAC, fire fighting and plumbing with other trades; produce clash reports</li>
+                  <li>Prepare shop drawings</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td class="r">B</td>
+              <td class="d">Sep 2023<br>– Jul 2025</td>
+              <td>
+                <h3>Zamil Projects</h3>
+                <p class="pos">Mechanical BIM Engineer</p>
+                <p class="proj">Extensions of Al-Haram Al-Makki, Makkah. Consultant: Dar Al-Handasah. Main contractor: Saudi Binladin Group. Sub-contractor: Zamil Projects.</p>
+                <ul>
+                  <li>Coordinate HVAC, fire fighting and plumbing with other trades; produce clash reports</li>
+                  <li>Prepare shop drawings</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <td class="r">A</td>
+              <td class="d">Feb 2023<br>– Aug 2023</td>
+              <td>
+                <h3>Al-Tawheed for Constructions &amp; Supplies</h3>
+                <p class="pos">Technical Office Engineer</p>
+                <p class="proj">VYE, New Sheikh Zayed. Owner: SODIC. Supervision consultant: Zuhair Fayez.</p>
+                <ul>
+                  <li>BIM management documents: BEP, TIDP, MIDP</li>
+                  <li>Study tender drawings, specs and BOQ; prepare RFIs</li>
+                  <li>Shop drawings and quantity take-off</li>
+                  <li>Material submittals and procurement reports</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="sheet" id="projects" aria-labelledby="h-proj">
+      <div class="tag"><span class="no">M-201</span><h2 id="h-proj">Projects</h2><span class="meta">Modelling · coordination · shop drawings</span></div>
+      <div class="projects">
+
+        <article class="project" aria-labelledby="p-pendry">
+          <div class="phead">
+            <div>
+              <p class="label">Saudico · 2026 – present</p>
+              <h3 id="p-pendry">Pendry Hotel &amp; Commercial Assets</h3>
+              <p class="desc">Hotel and commercial assets buildings in Diriyah. I review design packages, raise RFIs, coordinate chilled water and HVAC with the other trades, and issue shop drawings, builder's works and long-lead calculations.</p>
+            </div>
+            <dl class="spec">
+              <dt>Location</dt><dd>Diriyah, Riyadh, Saudi Arabia</dd>
+              <dt>Owner</dt><dd>DIRIYAH</dd>
+              <dt>Consultants</dt><dd>S+A (Samadhin + Associates), Omrania (egis group)</dd>
+              <dt>Contractor</dt><dd>Saudico</dd>
+              <dt>Role</dt><dd>Mechanical BIM Technical Office Engineer</dd>
+            </dl>
+          </div>
+          <div class="pgal">
+            <figure class="full"><div class="frame"><img src="pendry-diriyah.jpg" alt="Render of Diriyah buildings in the Najdi mud-brick style" data-cap="Diriyah · render by Diriyah Company" loading="lazy" style="aspect-ratio: 596 / 335"></div><figcaption class="cap"><span>Diriyah, Riyadh</span><span>Render: Diriyah Company</span></figcaption></figure>
+          </div>
+        </article>
+
+        <article class="project" aria-labelledby="p-bing">
+          <div class="phead">
+            <div>
+              <p class="label">Binghatti · 2025 – 2026</p>
+              <h3 id="p-bing">Binghatti high-rise residences</h3>
+              <p class="desc">Mechanical coordination on luxury towers in Dubai: HVAC, fire fighting and plumbing coordinated with structure, architecture and electrical, clash reports and shop drawings.</p>
+              <p class="out"><a href="https://www.binghatti.com/" target="_blank" rel="noopener">See the towers on binghatti.com</a></p>
+            </div>
+            <dl class="spec">
+              <dt>Location</dt><dd>Dubai, UAE</dd>
+              <dt>Towers</dt><dd>Bugatti Residences, Mercedes Residences, Skyrise Business Bay, Skyhall Business Bay, Burj Binghatti Jacob &amp; Co</dd>
+              <dt>Consultant</dt><dd>Selver Stone</dd>
+              <dt>Contractor</dt><dd>Granada Europe</dd>
+              <dt>Role</dt><dd>Mechanical BIM Engineer</dd>
+            </dl>
+          </div>
+          <div class="pgal tall">
+            <figure><div class="frame"><img src="binghatti-jacob.jpg" alt="Render of Burj Binghatti Jacob &amp; Co Residences" data-cap="Burj Binghatti Jacob &amp; Co Residences · render by Binghatti" loading="lazy"></div><figcaption class="cap"><span>Burj Binghatti Jacob &amp; Co</span><span>Render: Binghatti</span></figcaption></figure>
+            <figure><div class="frame"><img src="binghatti-mercedes.jpg" alt="Render of Mercedes-Benz Places by Binghatti" data-cap="Mercedes Residences · render by Binghatti" loading="lazy"></div><figcaption class="cap"><span>Mercedes Residences</span><span>Render: Binghatti</span></figcaption></figure>
+            <figure><div class="frame"><img src="binghatti-skyrise.jpg" alt="Render of Binghatti Skyrise towers in Business Bay at dusk" data-cap="Skyrise Business Bay · render by Binghatti" loading="lazy"></div><figcaption class="cap"><span>Skyrise Business Bay</span><span>Render: Binghatti</span></figcaption></figure>
+            <figure><div class="frame"><img src="binghatti-bugatti.jpg" alt="Bugatti Residences tower under construction" data-cap="Bugatti Residences · photo by Binghatti" loading="lazy"></div><figcaption class="cap"><span>Bugatti Residences</span><span>Photo: Binghatti</span></figcaption></figure>
+          </div>
+        </article>
+
+        <article class="project" aria-labelledby="p-haram">
+          <div class="phead">
+            <div>
+              <p class="label">Zamil Projects · 2023 – 2025</p>
+              <h3 id="p-haram">Extensions of Al-Haram Al-Makki</h3>
+              <p class="desc">Service buildings around the Grand Mosque. Areas were tracked by status: approved, to be coordinated and resubmitted, or still to be modelled.</p>
+            </div>
+            <dl class="spec">
+              <dt>Scope</dt><dd>Service buildings zones 06, 12, 15, 16 and Marwa Bridge</dd>
+              <dt>Location</dt><dd>Makkah, Saudi Arabia</dd>
+              <dt>Floors</dt><dd>Basement and 6 floors</dd>
+              <dt>Consultant</dt><dd>Dar Al-Handasah · main contractor Saudi Binladin Group</dd>
+              <dt>My work</dt><dd>Modelling, coordination and shop drawings</dd>
+            </dl>
+          </div>
+          <div class="pgal">
+            <figure><div class="frame"><img class="contain" src="haram-model.jpg" alt="Massing model of the Haram service buildings" data-cap="Haram · service buildings model" loading="lazy"></div><figcaption class="cap"><span>Building model</span><span>Zones 06–16</span></figcaption></figure>
+            <figure class="wide"><div class="frame"><img src="sample-mep.jpg" alt="Colour-coded coordinated MEP model of Haram service areas" data-cap="Haram · coordinated MEP model" loading="lazy"></div><figcaption class="cap"><span>Coordinated MEP model</span><span>All trades</span></figcaption></figure>
+          </div>
+        </article>
+
+        <article class="project" aria-labelledby="p-hosp">
+          <div class="phead">
+            <div>
+              <p class="label">Portfolio project · healthcare</p>
+              <h3 id="p-hosp">Elmohammadiya Hospital</h3>
+              <p class="desc">An integrated hospital with full MEP models per floor and typical-room coordination for procedure, clinic, waiting and office rooms.</p>
+            </div>
+            <dl class="spec">
+              <dt>Programme</dt><dd><span class="num">270</span> clinics and <span class="num">350</span> beds</dd>
+              <dt>Location</dt><dd>North Jeddah, Saudi Arabia</dd>
+              <dt>Area</dt><dd class="num">24,128 m² site · 233,970 m² built-up</dd>
+              <dt>Floors</dt><dd><span class="num">18</span></dd>
+              <dt>My work</dt><dd>HVAC, chilled water, fire fighting, plumbing and water supply models; room coordination; renders</dd>
+            </dl>
+          </div>
+          <div class="pgal">
+            <div class="full">
+              <div class="tabs" role="tablist" aria-label="First floor discipline models">
+                <button role="tab" id="t-hvac" aria-selected="true" data-k="hvac" style="--c: var(--duct)"><i></i>HVAC</button>
+                <button role="tab" id="t-chw" aria-selected="false" data-k="chw" style="--c: var(--chws)"><i></i>Chilled water</button>
+                <button role="tab" id="t-ff" aria-selected="false" data-k="ff" style="--c: var(--ff)"><i></i>Fire fighting</button>
+                <button role="tab" id="t-pl" aria-selected="false" data-k="pl" style="--c: var(--dcw)"><i></i>Plumbing</button>
+              </div>
+              <div class="models">
+                <div class="frame"><img id="m-img" src="hvac-model.jpg" alt="First floor HVAC model of the hospital" data-cap="HVAC model · first floor" width="1300" height="710"></div>
+                <div class="note" id="m-note" style="--c: var(--duct)">
+                  <p class="label">First floor</p>
+                  <h4 id="m-title">HVAC model</h4>
+                  <p id="m-text">Supply, return and exhaust ductwork with air terminals for a full hospital floor, sized from load and airflow calculations and coordinated against structure and ceilings.</p>
+                </div>
+              </div>
+            </div>
+            <figure><div class="frame"><img class="contain" src="hospital-model.jpg" alt="White massing model of Elmohammadiya Hospital" data-cap="Elmohammadiya Hospital · building model" loading="lazy"></div><figcaption class="cap"><span>Building model</span><span>18 floors</span></figcaption></figure>
+            <figure class="wide"><div class="frame"><img src="hospital-struct.jpg" alt="Structure model and under-construction model views of the hospital" data-cap="Hospital · structure and construction model views" loading="lazy"></div><figcaption class="cap"><span>Structure &amp; construction views</span><span>Hospital</span></figcaption></figure>
+            <figure><div class="frame"><img src="render-1.jpg" alt="Rendered ceiling void with coordinated ducts and pipes" data-cap="Hospital · ceiling void render" loading="lazy"></div><figcaption class="cap"><span>Ceiling void</span><span>Render</span></figcaption></figure>
+            <figure><div class="frame"><img src="render-2.jpg" alt="Rendered corridor services" data-cap="Hospital · corridor services render" loading="lazy"></div><figcaption class="cap"><span>Corridor services</span><span>Render</span></figcaption></figure>
+            <figure><div class="frame"><img src="render-3.jpg" alt="Rendered fan coil and ductwork in a room" data-cap="Hospital · room coordination render" loading="lazy"></div><figcaption class="cap"><span>Room coordination</span><span>Render</span></figcaption></figure>
+          </div>
+        </article>
+
+        <article class="project" aria-labelledby="p-vye">
+          <div class="phead">
+            <div>
+              <p class="label">Al-Tawheed · 2023</p>
+              <h3 id="p-vye">VYE · New Sheikh Zayed</h3>
+              <p class="desc">Residential compound by SODIC. I set up the BIM management documents and handled the technical office work for the mechanical package.</p>
+            </div>
+            <dl class="spec">
+              <dt>Owner</dt><dd>SODIC</dd>
+              <dt>Consultant</dt><dd>Zuhair Fayez</dd>
+              <dt>Contractor</dt><dd>Al-Tawheed for Constructions</dd>
+              <dt>My work</dt><dd>BEP, TIDP, MIDP; RFIs; coordination and clash reports; shop drawings, quantities, submittals and procurement reports</dd>
+            </dl>
+          </div>
+          <div class="pgal">
+            <figure class="full"><div class="frame"><img src="vye.jpg" alt="Render of a VYE villa in New Sheikh Zayed" data-cap="VYE · New Sheikh Zayed" loading="lazy" style="aspect-ratio: 16 / 7"></div><figcaption class="cap"><span>VYE</span><span>SODIC</span></figcaption></figure>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="sheet" id="work" aria-labelledby="h-work">
+      <div class="tag"><span class="no">M-301</span><h2 id="h-work">Other work</h2><span class="meta">Plant rooms · renders · shop drawings</span></div>
+      <div class="grid">
+        <figure><div class="frame"><img src="chiller-room.jpg" alt="Chiller plant model with chillers, pumps and headers" data-cap="Chiller room" loading="lazy"></div><figcaption class="cap"><span>Chiller room</span><span>CHW</span></figcaption></figure>
+        <figure><div class="frame"><img src="pump-room.jpg" alt="Fire pump room piping model" data-cap="Pump room" loading="lazy"></div><figcaption class="cap"><span>Pump room</span><span>FF</span></figcaption></figure>
+        <figure><div class="frame"><img src="render-plan.jpg" alt="Rendered cutaway of a floor showing ductwork and piping" data-cap="Rendered services cutaway" loading="lazy"></div><figcaption class="cap"><span>Services cutaway</span><span>Render</span></figcaption></figure>
+        <figure><div class="frame"><img src="shop-1.jpg" alt="Mechanical shop drawing sheets" data-cap="Shop drawings" loading="lazy"></div><figcaption class="cap"><span>Shop drawings</span><span>Sheets</span></figcaption></figure>
+        <figure class="wide"><div class="frame"><img src="shop-2.jpg" alt="Builder's work drawing sheets with sections" data-cap="Shop drawings and builder's works" loading="lazy"></div><figcaption class="cap"><span>Builder's works</span><span>Sheets</span></figcaption></figure>
+      </div>
+    </section>
+
+    <section class="sheet" id="automation" aria-labelledby="h-auto">
+      <div class="tag"><span class="no">M-401</span><h2 id="h-auto">Dynamo automation</h2><span class="meta">Revit · Dynamo · Excel</span></div>
+      <div class="auto">
+        <ol class="scripts">
+          <li><span class="k">DYN-01</span><div><b>Count air terminals per space</b><span>Counts supply and return terminals in each space and writes the totals to space parameters, so missing terminals show up on large projects.</span></div></li>
+          <li><span class="k">DYN-02</span><div><b>Set air terminal flow</b><span>Fills the airflow of every terminal from the space requirement, ready for duct sizing.</span></div></li>
+          <li><span class="k">DYN-03</span><div><b>Import and export data with Excel</b><span>Round-trips room and element data between Revit and Excel.</span></div></li>
+          <li><span class="k">DYN-04</span><div><b>Sleeve penetrations</b><span>Places sleeves where MEP elements cross concrete walls and slabs.</span></div></li>
+          <li><span class="k">DYN-05</span><div><b>CAD to Revit by location</b><span>Places families in Revit from X/Y coordinates read out of CAD data.</span></div></li>
+        </ol>
+        <div class="stack">
+          <div class="frame"><img src="dynamo-flow.jpg" alt="Dynamo graph beside Revit setting air terminal flow values" data-cap="DYN-02 · set air terminal flow" loading="lazy" width="1400" height="611"></div>
+          <div class="frame"><img src="dynamo-excel.jpg" alt="Dynamo graph importing and exporting data with Excel" data-cap="DYN-03 · Excel import and export" loading="lazy" width="1400" height="789"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet" id="skills" aria-labelledby="h-skills">
+      <div class="tag"><span class="no">M-501</span><h2 id="h-skills">Systems &amp; skills</h2><span class="meta">Design · modelling · codes</span></div>
+      <div class="skills">
+        <div class="skill" style="--c: var(--duct)"><h3>HVAC</h3><ul><li>System concepts and building load calculations</li><li>Airflow calculation and balancing</li><li>Ductwork, chilled water pipe and pump head calculations</li><li>Selection of chillers, AHUs, FCUs and exhaust fans</li><li>Design and shop drawings</li></ul><div class="chips"><span class="chip">ASHRAE</span><span class="chip">SMACNA</span><span class="chip">Carrier</span></div></div>
+        <div class="skill" style="--c: var(--ff)"><h3>Fire fighting</h3><ul><li>Sprinkler system design</li><li>Hydraulic calculations</li><li>Fire pump rooms and zone control valves</li></ul><div class="chips"><span class="chip">NFPA</span></div></div>
+        <div class="skill" style="--c: var(--dcw)"><h3>Plumbing</h3><ul><li>Water supply and drainage design</li><li>Pipe sizing for supply, drainage and vent</li><li>Piping and plumbing materials</li><li>Revit modelling of all mechanical systems</li></ul><div class="chips"><span class="chip">IPC</span><span class="chip">Egyptian code</span></div></div>
+        <div class="skill" style="--c: var(--chwr)"><h3>Pools &amp; fountains</h3><ul><li>Pumping, filtration, sterilisation and heating</li><li>Inlets, drains and vacuum design</li><li>Piping layout and pipe sizing</li></ul></div>
+        <div class="skill" style="--c: var(--accent)"><h3>Medical gases</h3><ul><li>Gas types, components and sources of supply</li><li>Network design and equipment selection</li></ul><div class="chips"><span class="chip">HTM</span></div></div>
+        <div class="skill" style="--c: var(--teal)"><h3>BIM &amp; technical office</h3><ul><li>BEP, TIDP and MIDP</li><li>Clash detection and reports</li><li>RFIs, submittals and quantity take-off</li><li>4D scheduling and rendering</li></ul><div class="chips"><span class="chip">ISO 19650</span></div></div>
+      </div>
+      <div class="soft">
+        <p class="label">Software</p>
+        <div class="chips">
+          <span class="chip">Revit</span><span class="chip">Navisworks</span><span class="chip">Dynamo</span><span class="chip">AutoCAD 2D</span><span class="chip">AutoCAD Autofluid</span><span class="chip">Civil 3D</span><span class="chip">Solibri</span><span class="chip">Bentley Synchro 4D &amp; 5D</span><span class="chip">Autodesk Construction Cloud</span><span class="chip">HAP</span><span class="chip">Duct Sizer</span><span class="chip">Elite Fire</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet" id="education" aria-labelledby="h-edu">
+      <div class="tag"><span class="no">M-601</span><h2 id="h-edu">Education &amp; languages</h2><span class="meta">2017 – 2022</span></div>
+      <div class="edu">
+        <div>
+          <p class="label">South Valley University · 2017 – 2022</p>
+          <h3>B.Sc. Mechanical Power Engineering</h3>
+          <p>Grade: Good. Graduation project: fire fighting system design for the Faculty of Engineering labs (grade: Excellent).</p>
+        </div>
+        <div>
+          <p class="label">Languages</p>
+          <h3>Arabic · English</h3>
+          <p>Arabic native. English B2, written and spoken.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sheet" id="contact" aria-labelledby="h-contact">
+      <div class="tag"><span class="no">M-701</span><h2 id="h-contact">Contact</h2><span class="meta">Cairo, Egypt</span></div>
+      <div class="contact">
+        <div>
+          <h2 class="big">Available for <em>mechanical BIM</em> roles</h2>
+          <p style="margin-top:14px;color:var(--muted);max-width:52ch">Open to Mechanical BIM and technical office roles on building projects in Egypt and the Gulf.</p>
+        </div>
+        <div class="lines">
+          <div><span class="label">Email</span><span class="v" id="v-mail">engabdelrahman039@gmail.com</span><button class="copy" type="button" data-t="v-mail">Copy</button></div>
+          <div><span class="label">Phone</span><span class="v" id="v-tel">+20 103 550 0551</span><button class="copy" type="button" data-t="v-tel">Copy</button></div>
+          <div><span class="label">LinkedIn</span><a class="v" href="https://www.linkedin.com/in/abdelrahman-fathy-ab8373175/" target="_blank" rel="noopener">linkedin.com/in/abdelrahman-fathy-ab8373175</a><span></span></div>
+          <div><span class="label">Based</span><span class="v">Nasr City, Cairo</span><span></span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Abdelrahman Fathy Attia · Mechanical BIM Engineer</span>
+    <span>Sheet set M-000 – M-701</span>
+  </div>
+</footer>
+
+<dialog id="lb" aria-label="Image preview">
+  <button class="copy" type="button" id="lb-close">Close</button>
+  <img id="lb-img" src="" alt="">
+  <p class="cap" id="lb-cap"></p>
+</dialog>
+
+<script>
+/* Background: a live MEP plan. Static network drawn once per resize; glowing flow pulses run along ducts and pipes. */
+(function () {
+  var cv = document.getElementById('plan'); if (!cv || !cv.getContext) { return; }
+  var ctx = cv.getContext('2d'), base = document.createElement('canvas'), bctx = base.getContext('2d');
+  var still = false; try { still = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var segs = [], pulses = [], C = {}, A = 0.3, W = 0, H = 0, dpr = 1, raf = 0, scan = 0;
+  function tok(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function rng(seed) { return function () { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+
+  function build() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2); W = window.innerWidth; H = window.innerHeight;
+    [cv, base].forEach(function (c) { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); });
+    var dark = tok('color-scheme').indexOf('dark') > -1;
+    C = { line: tok('--line'), duct: tok('--duct'), chws: tok('--chws'), chwr: tok('--chwr'), ff: tok('--ff'), drn: tok('--drn'), dcw: tok('--dcw'), muted: tok('--muted'), teal: tok('--teal') };
+    A = dark ? 0.24 : 0.3; segs = [];
+    var r = rng(19650), G = W < 700 ? 170 : 240, cols = Math.ceil(W / G) + 1, rows = Math.ceil(H / G) + 1;
+    var b = bctx; b.setTransform(dpr, 0, 0, dpr, 0, 0); b.clearRect(0, 0, W, H); b.lineCap = 'round';
+    function ln(x1, y1, x2, y2, col, w, dash, a, flow) {
+      b.globalAlpha = a || A; b.strokeStyle = col; b.lineWidth = w || 1; b.setLineDash(dash || []);
+      b.beginPath(); b.moveTo(x1, y1); b.lineTo(x2, y2); b.stroke(); b.setLineDash([]);
+      if (flow) { segs.push({ x1: x1, y1: y1, x2: x2, y2: y2, c: col, len: Math.hypot(x2 - x1, y2 - y1) }); }
+    }
+    function tx(s, x, y, col, a) { b.globalAlpha = a || A; b.fillStyle = col; b.font = '10px "IBM Plex Mono", Consolas, monospace'; b.fillText(s, x, y); }
+    function ring(x, y, rad, col, a) { b.globalAlpha = a || A; b.strokeStyle = col; b.lineWidth = 1.1; b.beginPath(); b.arc(x, y, rad, 0, Math.PI * 2); b.stroke(); }
+
+    // structural grid + bubbles
+    var L = 'ABCDEFGHJKLM';
+    for (var i = 0; i < cols; i++) { var x = 60 + i * G; ln(x, 46, x, H, C.line, 1, [18, 5, 3, 5], A * 1.7); ring(x, 30, 13, C.line, A * 1.7); b.textAlign = 'center'; tx(String(i + 1), x, 34, C.muted, A * 1.8); b.textAlign = 'left'; }
+    for (var j = 0; j < rows; j++) { var y = 80 + j * G; ln(46, y, W, y, C.line, 1, [18, 5, 3, 5], A * 1.7); ring(30, y, 13, C.line, A * 1.7); b.textAlign = 'center'; tx(L[j % L.length], 30, y + 4, C.muted, A * 1.8); b.textAlign = 'left'; }
+
+    // corridors: duct + CHW pair, branches to diffusers and FCUs
+    for (var k = 0; k < rows; k += 2) {
+      var cy = 80 + k * G + G * 0.5, dw = 18;
+      ln(60, cy - dw / 2, W, cy - dw / 2, C.duct, 1.3); ln(60, cy + dw / 2, W, cy + dw / 2, C.duct, 1.3);
+      segs.push({ x1: 60, y1: cy, x2: W, y2: cy, c: C.duct, len: W - 60 });
+      tx('SA ' + (600 + 100 * (k % 3)) + 'x300', 80 + (k * 37) % G, cy - dw / 2 - 6, C.duct);
+      var sy = cy + dw / 2 + 14, ry = sy + 8;
+      ln(60, sy, W, sy, C.chws, 1.6, null, A, true); ln(W, ry, 60, ry, C.chwr, 1.6, [9, 5], A, true);
+      tx('CHWS/R ' + [50, 65, 80][k % 3] + 'Ø', 80 + (k * 53 + 120) % G, ry + 14, C.chws);
+      for (var q = 0; q < cols; q++) {
+        var bx = 60 + q * G + G * (0.35 + r() * 0.3), up = r() > 0.5 ? -1 : 1, len = G * (0.28 + r() * 0.12), ey = cy + up * (dw / 2 + len);
+        ln(bx - 5, cy + up * dw / 2, bx - 5, ey, C.duct, 1.1); ln(bx + 5, cy + up * dw / 2, bx + 5, ey, C.duct, 1.1);
+        segs.push({ x1: bx, y1: cy, x2: bx, y2: ey, c: C.duct, len: Math.abs(ey - cy) });
+        var dy = ey + up * 13; b.globalAlpha = A; b.strokeStyle = C.duct; b.lineWidth = 1.1; b.strokeRect(bx - 13, dy - 13, 26, 26);
+        ln(bx - 13, dy - 13, bx + 13, dy + 13, C.duct, 1); ln(bx + 13, dy - 13, bx - 13, dy + 13, C.duct, 1);
+        if (r() > 0.45) {
+          var fx = bx + G * 0.22, fy = ry + 30 + r() * 30;
+          ln(fx, sy, fx, fy, C.chws, 1.2, null, A, true); ln(fx + 8, fy, fx + 8, ry, C.chwr, 1.2, [6, 4], A, true);
+          b.globalAlpha = A; b.strokeStyle = C.muted; b.lineWidth = 1.1; b.strokeRect(fx - 14, fy, 44, 22); tx('FCU', fx - 8, fy + 15, C.muted);
+        }
+      }
+    }
+    // fire fighting risers and branches with sprinkler heads
+    for (var f = 1; f < cols; f += 3) {
+      var fx0 = 60 + f * G + 22; ln(fx0, 60, fx0, H, C.ff, 1.5, null, A, true); tx('FF 100Ø', fx0 + 6, 70 + (f * 41) % 200, C.ff);
+      for (var s = 0; s < rows * 2; s++) {
+        var by = 80 + s * G / 2 + G * 0.25; if (Math.abs(((by - 80) % (2 * G)) - G * 0.5) < 40) { continue; }
+        var bl = G * (0.9 + r() * 0.6); ln(fx0, by, fx0 + bl, by, C.ff, 1, null, A, true);
+        for (var h = 1; h * 70 < bl; h++) { ring(fx0 + h * 70, by, 4, C.ff); }
+      }
+    }
+    // drainage stacks
+    for (var d = 2; d < cols; d += 4) { for (var e = 1; e < rows; e += 2) {
+      var px = 60 + d * G - 30, py = 80 + e * G + 34; ring(px, py, 9, C.drn); tx('SVP', px - 10, py - 14, C.drn);
+      ln(px + 9, py, px + G * 0.45, py + G * 0.18, C.drn, 1.3, [10, 5], A, true);
+    } }
+    b.globalAlpha = 1;
+
+    // flow pulses, one per few segments, weighted to long runs
+    pulses = []; var n = Math.min(90, Math.round(W * H / 16000));
+    for (var p = 0; p < n; p++) { var sg = segs[Math.floor(r() * segs.length)]; if (sg && sg.len > 40) { pulses.push({ s: sg, t: r(), v: (40 + r() * 70) / sg.len }); } }
+  }
+
+  var last = 0;
+  function frame(ts) {
+    var dt = last ? Math.min((ts - last) / 1000, 0.05) : 0; last = ts;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(base, 0, 0);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // scanning line, like a model section sweeping the plan
+    scan = (scan + dt * 60) % (H + 200);
+    var gy = scan - 100, grad = ctx.createLinearGradient(0, gy - 60, 0, gy + 4);
+    ctx.globalAlpha = A * 0.5; grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, C.teal);
+    ctx.fillStyle = grad; ctx.fillRect(0, gy - 60, W, 64);
+    ctx.globalAlpha = A * 1.6; ctx.fillStyle = C.teal; ctx.fillRect(0, gy + 3, W, 1);
+    // pulses
+    ctx.lineCap = 'round';
+    for (var i = 0; i < pulses.length; i++) {
+      var p = pulses[i], s = p.s; p.t += p.v * dt; if (p.t > 1) { p.t -= 1; }
+      var x = s.x1 + (s.x2 - s.x1) * p.t, y = s.y1 + (s.y2 - s.y1) * p.t, ux = (s.x2 - s.x1) / s.len, uy = (s.y2 - s.y1) / s.len;
+      ctx.globalAlpha = Math.min(1, A * 3.2); ctx.strokeStyle = s.c; ctx.lineWidth = 2.4;
+      ctx.shadowColor = s.c; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.moveTo(x - ux * 22, y - uy * 22); ctx.lineTo(x, y); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    ctx.globalAlpha = 1;
+    raf = requestAnimationFrame(frame);
+  }
+  function start() { cancelAnimationFrame(raf); last = 0; if (still || document.hidden) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height); ctx.drawImage(base, 0, 0); return; } raf = requestAnimationFrame(frame); }
+  function rebuild() { build(); start(); }
+  var t; window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(rebuild, 150); });
+  document.addEventListener('visibilitychange', start);
+  try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuild); } catch (e) {}
+  try { new MutationObserver(rebuild).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) {}
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(rebuild); }
+  rebuild();
+})();
+
+(function () {
+  var models = {
+    hvac: { img: "hvac-model.jpg", c: "var(--duct)", t: "HVAC model", p: "Supply, return and exhaust ductwork with air terminals for a full hospital floor, sized from load and airflow calculations and coordinated against structure and ceilings." },
+    chw:  { img: "chw-model.jpg",  c: "var(--chws)", t: "Chilled water model", p: "Chilled water supply and return to every fan coil unit on the floor, with pipe sizes from flow rates and pump head calculations." },
+    ff:   { img: "ff-model.jpg",   c: "var(--ff)",   t: "Fire fighting model", p: "Sprinkler mains, branches and heads laid out to NFPA spacing, with hydraulic calculations behind the pipe sizes." },
+    pl:   { img: "plumb-model.jpg",c: "var(--dcw)",  t: "Plumbing model", p: "Water supply, drainage and vent networks for the floor's wet areas, sized to IPC and routed around the other services." }
+  };
+  var tabs = document.querySelectorAll('.tabs [role="tab"]');
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var m = models[b.dataset.k];
+      tabs.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      var img = document.getElementById('m-img');
+      img.src = m.img; img.alt = m.t + ' of the hospital first floor'; img.dataset.cap = m.t + ' · first floor';
+      document.getElementById('m-note').style.setProperty('--c', m.c);
+      document.getElementById('m-title').textContent = m.t;
+      document.getElementById('m-text').textContent = m.p;
+    });
+  });
+
+  var lb = document.getElementById('lb'), lbImg = document.getElementById('lb-img'), lbCap = document.getElementById('lb-cap');
+  document.querySelectorAll('img[data-cap]').forEach(function (img) {
+    img.style.cursor = 'zoom-in';
+    img.addEventListener('click', function () {
+      lbImg.src = img.currentSrc || img.src; lbImg.alt = img.alt; lbCap.textContent = img.dataset.cap || '';
+      if (lb.showModal) { lb.showModal(); }
+    });
+  });
+  document.getElementById('lb-close').addEventListener('click', function () { lb.close(); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) { lb.close(); } });
+
+  document.querySelectorAll('.copy[data-t]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var el = document.getElementById(b.dataset.t), text = el.textContent.trim();
+      function selectIt() { var r = document.createRange(); r.selectNodeContents(el); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected'; }
+      try { navigator.clipboard.writeText(text).then(function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1600); }, selectIt); } catch (e) { selectIt(); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
